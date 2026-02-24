@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture — CausalArmor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/shared.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: 'Montserrat', sans-serif; }
+    .font-brand { font-family: 'Audiowide', cursive; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="gradient-header text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="font-brand text-2xl tracking-wide">CausalArmor</a>
+        <nav class="hidden md:flex space-x-6 text-sm font-medium">
+          <a href="index.html" class="text-white/70 hover:text-white transition">Home</a>
+          <a href="demo-run.html" class="text-white/70 hover:text-white transition">Demo Run</a>
+          <a href="attribution.html" class="text-white/70 hover:text-white transition">Attribution</a>
+          <a href="architecture.html" class="text-white/90 hover:text-white border-b-2 border-white pb-0.5">Architecture</a>
+        </nav>
+        <div class="md:hidden" x-data="{ open: false }">
+          <button @click="open = !open" class="text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <div x-show="open" @click.away="open = false" class="absolute right-4 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+            <a href="index.html" class="block px-4 py-2 text-slate-600 hover:text-teal-600">Home</a>
+            <a href="demo-run.html" class="block px-4 py-2 text-slate-600 hover:text-teal-600">Demo Run</a>
+            <a href="attribution.html" class="block px-4 py-2 text-slate-600 hover:text-teal-600">Attribution</a>
+            <a href="architecture.html" class="block px-4 py-2 text-teal-700 font-medium">Architecture</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 class="font-brand text-3xl text-slate-800 mb-2">System Architecture</h1>
+      <p class="text-slate-500 mb-10">How CausalArmor integrates with LangGraph as a guard node to protect agent tool calls.</p>
+
+      <!-- LangGraph Agent Flow -->
+      <section class="mb-16">
+        <h2 class="font-brand text-xl text-slate-700 mb-6">LangGraph Agent Flow</h2>
+        <div class="bg-gradient-to-br from-white to-cyan-50/50 rounded-2xl shadow-lg p-8 overflow-x-auto border border-cyan-100">
+          <div class="mermaid">
+            graph LR
+              A["🧑 User Input"] --> B["🤖 Agent LLM\n(Gemini 2.5 Pro)"]
+              B --> C{"Tool Call?"}
+              C -->|"No"| D["✅ Final Response"]
+              C -->|"Yes"| E["🛡️ CausalArmor\nGuard Node"]
+              E --> F{"Attack\nDetected?"}
+              F -->|"No - Safe"| G["⚡ Execute Tool"]
+              F -->|"Yes - Attack"| H["🔄 Sanitize LLM\n(Gemini 2.5 Flash)"]
+              H --> B
+              G --> I["📦 Tool Result"]
+              I --> B
+
+              style A fill:#e0f2fe,stroke:#0284c7,stroke-width:2px,color:#0c4a6e
+              style B fill:#cffafe,stroke:#0891b2,stroke-width:2px,color:#164e63
+              style C fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+              style D fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#064e3b
+              style E fill:#ede9fe,stroke:#7c3aed,stroke-width:3px,color:#4c1d95
+              style F fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#831843
+              style G fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#064e3b
+              style H fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+              style I fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#7c2d12
+          </div>
+        </div>
+      </section>
+
+      <!-- Model Stack Table -->
+      <section class="mb-16">
+        <h2 class="font-brand text-xl text-slate-700 mb-6">Model Stack</h2>
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-slate-50 to-cyan-50">
+              <tr>
+                <th class="text-left px-6 py-4 text-sm font-semibold text-slate-600">Role</th>
+                <th class="text-left px-6 py-4 text-sm font-semibold text-slate-600">Model</th>
+                <th class="text-left px-6 py-4 text-sm font-semibold text-slate-600">Serving</th>
+                <th class="text-left px-6 py-4 text-sm font-semibold text-slate-600">Purpose</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-cyan-500"></span>
+                    <span class="font-semibold text-sm text-slate-800">Agent</span>
+                  </span>
+                </td>
+                <td class="px-6 py-4 font-mono text-sm text-slate-700">Gemini 2.5 Pro</td>
+                <td class="px-6 py-4 text-sm text-slate-500">Google AI API</td>
+                <td class="px-6 py-4 text-sm text-slate-500">Primary reasoning and tool-calling LLM</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+                    <span class="font-semibold text-sm text-slate-800">Proxy</span>
+                  </span>
+                </td>
+                <td class="px-6 py-4 font-mono text-sm text-slate-700">Gemma-3-12B-IT</td>
+                <td class="px-6 py-4 text-sm text-slate-500">vLLM (self-hosted)</td>
+                <td class="px-6 py-4 text-sm text-slate-500">LOO log-probability scoring for causal attribution</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+                    <span class="font-semibold text-sm text-slate-800">Sanitizer</span>
+                  </span>
+                </td>
+                <td class="px-6 py-4 font-mono text-sm text-slate-700">Gemini 2.5 Flash</td>
+                <td class="px-6 py-4 text-sm text-slate-500">Google AI API</td>
+                <td class="px-6 py-4 text-sm text-slate-500">Rewrites tool outputs to remove injected instructions</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- LOO Scoring Diagram -->
+      <section class="mb-16">
+        <h2 class="font-brand text-xl text-slate-700 mb-6">LOO Scoring Pipeline</h2>
+        <div class="bg-gradient-to-br from-white to-purple-50/50 rounded-2xl shadow-lg p-8 overflow-x-auto border border-purple-100">
+          <div class="mermaid">
+            graph LR
+              subgraph Variants["📋 Context Variants"]
+                V1["Full Context\n(user + tools + action)"]
+                V2["Minus User\n(tools + action)"]
+                V3["Minus Tool Result\n(user + action)"]
+              end
+
+              subgraph Proxy["🔬 Proxy Model (vLLM)"]
+                P["Gemma-3-12B-IT\nLog-prob Scoring"]
+              end
+
+              V1 --> P
+              V2 --> P
+              V3 --> P
+
+              P --> S1["score_full = -42.5"]
+              P --> S2["score_no_user = -45.1"]
+              P --> S3["score_no_tool = -80.3"]
+
+              subgraph Deltas["📊 Normalized Deltas"]
+                D1["delta_user = 0.346"]
+                D2["delta_tool = 2.741"]
+              end
+
+              S1 --> D1
+              S2 --> D1
+              S1 --> D2
+              S3 --> D2
+
+              D1 --> DEC{"delta_tool >\ndelta_user - tau?"}
+              D2 --> DEC
+
+              DEC -->|"Yes"| ATK["🚨 ATTACK DETECTED"]
+              DEC -->|"No"| SAFE["✅ SAFE - Proceed"]
+
+              style V1 fill:#dbeafe,stroke:#3b82f6,stroke-width:2px,color:#1e3a5f
+              style V2 fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
+              style V3 fill:#ede9fe,stroke:#7c3aed,stroke-width:2px,color:#4c1d95
+              style P fill:#cffafe,stroke:#0891b2,stroke-width:2px,color:#164e63
+              style S1 fill:#e0f2fe,stroke:#0284c7,stroke-width:1px,color:#0c4a6e
+              style S2 fill:#fef9c3,stroke:#ca8a04,stroke-width:1px,color:#713f12
+              style S3 fill:#f3e8ff,stroke:#9333ea,stroke-width:1px,color:#581c87
+              style D1 fill:#fff7ed,stroke:#ea580c,stroke-width:2px,color:#7c2d12
+              style D2 fill:#fff1f2,stroke:#e11d48,stroke-width:2px,color:#881337
+              style DEC fill:#fce7f3,stroke:#db2777,stroke-width:2px,color:#831843
+              style ATK fill:#fee2e2,stroke:#dc2626,stroke-width:3px,color:#7f1d1d
+              style SAFE fill:#d1fae5,stroke:#059669,stroke-width:3px,color:#064e3b
+          </div>
+        </div>
+      </section>
+
+      <!-- Integration Card -->
+      <section class="mb-16">
+        <h2 class="font-brand text-xl text-slate-700 mb-6">LangGraph Integration</h2>
+        <div class="bg-white rounded-2xl shadow-lg p-8 border-l-purple">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <h3 class="font-semibold text-lg text-slate-800 mb-4">How CausalArmor Plugs In</h3>
+              <p class="text-sm text-slate-500 mb-4">
+                CausalArmor operates as a <strong>guard node</strong> in the LangGraph state machine, sitting between the agent's decision to call a tool and the actual tool execution. It intercepts every tool call for inspection.
+              </p>
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-6 h-6 bg-cyan-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-cyan-700">1</span>
+                  </div>
+                  <p class="text-sm text-slate-600"><strong>Intercept:</strong> The guard node receives the agent's proposed tool call and the full message history.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-6 h-6 bg-orange-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-orange-700">2</span>
+                  </div>
+                  <p class="text-sm text-slate-600"><strong>Score:</strong> Three variants are scored by the proxy model (vLLM) to compute LOO deltas.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-6 h-6 bg-purple-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-purple-700">3</span>
+                  </div>
+                  <p class="text-sm text-slate-600"><strong>Decide:</strong> If tool influence exceeds user influence, the action is flagged as an attack.</p>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-6 h-6 bg-emerald-100 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-emerald-700">4</span>
+                  </div>
+                  <p class="text-sm text-slate-600"><strong>Defend:</strong> If attacked, sanitize tool output, mask CoT, and have the agent regenerate a safe action.</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-lg text-slate-800 mb-4">Guard Node in the State Graph</h3>
+              <div class="code-block text-xs overflow-x-auto">
+<span class="text-purple-400">from</span> langgraph.graph <span class="text-purple-400">import</span> StateGraph
+<span class="text-purple-400">from</span> causal_armor <span class="text-purple-400">import</span> CausalGuard
+
+<span class="text-slate-500"># Define the state graph</span>
+graph = StateGraph(AgentState)
+
+<span class="text-slate-500"># Add nodes</span>
+graph.add_node(<span class="text-yellow-300">"agent"</span>, agent_node)
+graph.add_node(<span class="text-yellow-300">"guard"</span>, causal_guard_node)
+graph.add_node(<span class="text-yellow-300">"tools"</span>, tool_executor)
+
+<span class="text-slate-500"># Agent → Guard → Tools flow</span>
+graph.add_edge(<span class="text-yellow-300">"agent"</span>, <span class="text-yellow-300">"guard"</span>)
+graph.add_conditional_edges(
+    <span class="text-yellow-300">"guard"</span>,
+    route_after_guard,
+    {
+        <span class="text-yellow-300">"safe"</span>: <span class="text-yellow-300">"tools"</span>,
+        <span class="text-yellow-300">"attack"</span>: <span class="text-yellow-300">"agent"</span>,  <span class="text-slate-500"># regenerate</span>
+    }
+)
+graph.add_edge(<span class="text-yellow-300">"tools"</span>, <span class="text-yellow-300">"agent"</span>)
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Design Decisions -->
+      <section class="mb-16">
+        <h2 class="font-brand text-xl text-slate-700 mb-6">Key Design Decisions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+            <h3 class="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Separate Proxy Model
+            </h3>
+            <p class="text-sm text-slate-500">Using a smaller Gemma model for log-prob scoring means the guard is fast (&lt; 2s) and doesn't depend on the agent's own (potentially compromised) reasoning.</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+            <h3 class="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              Causal Not Heuristic
+            </h3>
+            <p class="text-sm text-slate-500">LOO attribution is a principled causal method — it measures actual influence rather than pattern-matching on known attack strings, making it robust to novel attacks.</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+            <h3 class="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Regenerate, Don't Block
+            </h3>
+            <p class="text-sm text-slate-500">Instead of simply refusing to act, CausalArmor sanitizes context and lets the agent try again — preserving the user's task completion while neutralizing the attack.</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+            <h3 class="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+              Framework Agnostic
+            </h3>
+            <p class="text-sm text-slate-500">While this demo uses LangGraph, CausalArmor's core scoring works with any agent framework — it just needs the message history and proposed action.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+      <p>CausalArmor Demo &mdash; Real run data from Gemini 2.5 Pro + CausalArmor defense pipeline</p>
+      <p class="mt-1 text-slate-500">Static demo site &bull; No backend required</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#0d9488',
+        primaryTextColor: '#1e293b',
+        primaryBorderColor: '#14b8a6',
+        lineColor: '#64748b',
+        secondaryColor: '#ede9fe',
+        tertiaryColor: '#fef3c7',
+        fontFamily: 'Montserrat, sans-serif',
+        fontSize: '14px',
+        edgeLabelBackground: '#f8fafc',
+        clusterBkg: '#f8fafc',
+        clusterBorder: '#94a3b8',
+      },
+      flowchart: {
+        curve: 'basis',
+        padding: 20,
+        htmlLabels: true,
+      }
+    });
+  </script>
+</body>
+</html>
