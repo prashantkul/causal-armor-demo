@@ -229,29 +229,37 @@
             </div>
             <div>
               <h3 class="font-semibold text-lg text-slate-800 mb-4">Guard Node in the State Graph</h3>
-              <div class="code-block text-xs overflow-x-auto">
-<span class="text-purple-400">from</span> langgraph.graph <span class="text-purple-400">import</span> StateGraph
-<span class="text-purple-400">from</span> causal_armor <span class="text-purple-400">import</span> CausalGuard
-
-<span class="text-slate-500"># Define the state graph</span>
-graph = StateGraph(AgentState)
-
-<span class="text-slate-500"># Add nodes</span>
-graph.add_node(<span class="text-yellow-300">"agent"</span>, agent_node)
-graph.add_node(<span class="text-yellow-300">"guard"</span>, causal_guard_node)
-graph.add_node(<span class="text-yellow-300">"tools"</span>, tool_executor)
-
-<span class="text-slate-500"># Agent → Guard → Tools flow</span>
-graph.add_edge(<span class="text-yellow-300">"agent"</span>, <span class="text-yellow-300">"guard"</span>)
-graph.add_conditional_edges(
-    <span class="text-yellow-300">"guard"</span>,
-    route_after_guard,
-    {
-        <span class="text-yellow-300">"safe"</span>: <span class="text-yellow-300">"tools"</span>,
-        <span class="text-yellow-300">"attack"</span>: <span class="text-yellow-300">"agent"</span>,  <span class="text-slate-500"># regenerate</span>
-    }
-)
-graph.add_edge(<span class="text-yellow-300">"tools"</span>, <span class="text-yellow-300">"agent"</span>)
+              <div class="rounded-xl overflow-hidden shadow-inner">
+                <div class="bg-slate-800 flex items-center gap-2 px-4 py-2.5 border-b border-slate-700">
+                  <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                  <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                  <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                  <span class="ml-3 text-xs text-slate-400 font-mono">graph_builder.py</span>
+                </div>
+                <div class="bg-slate-900 px-5 py-4 font-mono text-sm leading-6 overflow-x-auto">
+<span class="text-slate-500 select-none"> 1  </span><span class="text-pink-400">from</span> <span class="text-cyan-300">langgraph.graph</span> <span class="text-pink-400">import</span> <span class="text-white">StateGraph</span>
+<span class="text-slate-500 select-none"> 2  </span><span class="text-pink-400">from</span> <span class="text-cyan-300">causal_armor</span> <span class="text-pink-400">import</span> <span class="text-white">CausalGuard</span>
+<span class="text-slate-500 select-none"> 3  </span>
+<span class="text-slate-500 select-none"> 4  </span><span class="text-slate-500 italic"># Define the state graph</span>
+<span class="text-slate-500 select-none"> 5  </span><span class="text-white">graph</span> <span class="text-pink-400">=</span> <span class="text-green-400">StateGraph</span><span class="text-slate-300">(</span><span class="text-orange-300">AgentState</span><span class="text-slate-300">)</span>
+<span class="text-slate-500 select-none"> 6  </span>
+<span class="text-slate-500 select-none"> 7  </span><span class="text-slate-500 italic"># Add nodes</span>
+<span class="text-slate-500 select-none"> 8  </span><span class="text-white">graph</span><span class="text-slate-300">.</span><span class="text-blue-400">add_node</span><span class="text-slate-300">(</span><span class="text-yellow-300">"agent"</span><span class="text-slate-300">,</span> <span class="text-white">agent_node</span><span class="text-slate-300">)</span>
+<span class="text-slate-500 select-none"> 9  </span><span class="text-white">graph</span><span class="text-slate-300">.</span><span class="text-blue-400">add_node</span><span class="text-slate-300">(</span><span class="text-yellow-300">"guard"</span><span class="text-slate-300">,</span> <span class="text-white">causal_guard_node</span><span class="text-slate-300">)</span>
+<span class="text-slate-500 select-none">10  </span><span class="text-white">graph</span><span class="text-slate-300">.</span><span class="text-blue-400">add_node</span><span class="text-slate-300">(</span><span class="text-yellow-300">"tools"</span><span class="text-slate-300">,</span> <span class="text-white">tool_executor</span><span class="text-slate-300">)</span>
+<span class="text-slate-500 select-none">11  </span>
+<span class="text-slate-500 select-none">12  </span><span class="text-slate-500 italic"># Agent → Guard → Tools flow</span>
+<span class="text-slate-500 select-none">13  </span><span class="text-white">graph</span><span class="text-slate-300">.</span><span class="text-blue-400">add_edge</span><span class="text-slate-300">(</span><span class="text-yellow-300">"agent"</span><span class="text-slate-300">,</span> <span class="text-yellow-300">"guard"</span><span class="text-slate-300">)</span>
+<span class="text-slate-500 select-none">14  </span><span class="text-white">graph</span><span class="text-slate-300">.</span><span class="text-blue-400">add_conditional_edges</span><span class="text-slate-300">(</span>
+<span class="text-slate-500 select-none">15  </span>    <span class="text-yellow-300">"guard"</span><span class="text-slate-300">,</span>
+<span class="text-slate-500 select-none">16  </span>    <span class="text-white">route_after_guard</span><span class="text-slate-300">,</span>
+<span class="text-slate-500 select-none">17  </span>    <span class="text-slate-300">{</span>
+<span class="text-slate-500 select-none">18  </span>        <span class="text-yellow-300">"safe"</span><span class="text-slate-300">:</span> <span class="text-yellow-300">"tools"</span><span class="text-slate-300">,</span>
+<span class="text-slate-500 select-none">19  </span>        <span class="text-yellow-300">"attack"</span><span class="text-slate-300">:</span> <span class="text-yellow-300">"agent"</span><span class="text-slate-300">,</span>  <span class="text-slate-500 italic"># regenerate</span>
+<span class="text-slate-500 select-none">20  </span>    <span class="text-slate-300">}</span>
+<span class="text-slate-500 select-none">21  </span><span class="text-slate-300">)</span>
+<span class="text-slate-500 select-none">22  </span><span class="text-white">graph</span><span class="text-slate-300">.</span><span class="text-blue-400">add_edge</span><span class="text-slate-300">(</span><span class="text-yellow-300">"tools"</span><span class="text-slate-300">,</span> <span class="text-yellow-300">"agent"</span><span class="text-slate-300">)</span>
+                </div>
               </div>
             </div>
           </div>
