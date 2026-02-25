@@ -181,6 +181,12 @@
               style ATK fill:#fee2e2,stroke:#dc2626,stroke-width:3px,color:#7f1d1d
               style SAFE fill:#d1fae5,stroke:#059669,stroke-width:3px,color:#064e3b
           </div>
+          <div class="mt-6 bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
+            <p class="text-sm text-amber-900">
+              <strong class="font-semibold">What is &tau; (tau)?</strong> &mdash;
+              Tau is a sensitivity threshold that controls how aggressive the detector is. When <code class="bg-amber-100 px-1 rounded text-xs">&tau; = 0</code>, an action is flagged whenever the tool's causal influence on the action exceeds the user's influence (<code class="bg-amber-100 px-1 rounded text-xs">delta_tool &gt; delta_user</code>). A positive &tau; makes the detector more lenient (fewer false positives), while a negative &tau; makes it stricter (fewer missed attacks). In this demo we use <code class="bg-amber-100 px-1 rounded text-xs">&tau; = 0.0</code>.
+            </p>
+          </div>
         </div>
       </section>
 
